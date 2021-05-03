@@ -1,0 +1,57 @@
+<html>
+<body onload="display_c()">
+
+	<span id='ct'></span>
+	<br>
+	<br>
+
+
+	<label for="clearLogs"> Clear Logs : </label>
+	<input type="checkbox" id="clearLogs" checked />
+	<br />
+
+	<label for="deleteTempFiles"> Delete Temp Files :</label>
+	<input type="checkbox" id="deleteTempFiles" checked />
+
+	<br />
+
+	<input type="button" value="Submit" onclick="sendRequest()" />
+</body>
+<script>
+	function sendRequest() {
+		var clearLogs = document.getElementById('clearLogs').checked;
+		var delTempFiles = document.getElementById('deleteTempFiles').checked;
+		console.log("Clear Logs =>" + clearLogs);
+		console.log("Del Temp Files =>" + delTempFiles);
+		var url = "http://localhost:8090/wlutil/clean?clearLogs=" + clearLogs
+				+ "&delTempFiles=" + delTempFiles;
+		httpGetAsync(url, showSuccMsg);
+	}
+	
+	function showSuccMsg(msg) {
+		/* alert("Delete the folders successfully!");
+		alert(msg) */
+	}
+
+	function httpGetAsync(theUrl, callback) {
+		var xmlHttp = new XMLHttpRequest();
+		xmlHttp.onreadystatechange = function() {
+			if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+				callback(xmlHttp.responseText);
+		}
+		xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+		xmlHttp.send(null);
+	}
+
+	function display_c() {
+		var refresh = 1000; // Refresh rate in milli seconds
+		mytime = setTimeout('display_ct()', refresh)
+	}
+
+	function display_ct() {
+		var x = new Date()
+		document.getElementById('ct').innerHTML = x;
+		display_c();
+	}
+</script>
+</html>

@@ -1,0 +1,23 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /wlutil
+spring:
+  application:
+    name: weblogic-clean-util
+  security:
+    user:
+      name: config
+      password: fdx-2018
+      
+wl:
+  adminserver:
+    lockfie: /Users/gopikrishnamandapati/wls12213/user_projects/domains/base_domain/servers/AdminServer/tmp/AdminServer.lok
+    tmp: /Users/gopikrishnamandapati/wls12213/user_projects/domains/base_domain/servers/AdminServer/tmp
+    logs: /Users/gopikrishnamandapati/wls12213/user_projects/domains/base_domain/servers/AdminServer/logs
+
+logging:
+  level:
+    root: error
+    com:
+      fedex: info

@@ -1,0 +1,177 @@
+package com.fedex.oce.wlutil.ws;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController("/")
+public class WlCleanUtilWebService2 {
+
+	@Value("${wl.adminserver.lockfie}")
+	private String lokFile;
+
+	@Value("${wl.adminserver.tmp}")
+	private String wlServerTmpFolder;
+
+	@Value("${wl.adminserver.logs}")
+	private String wlServerLogsFolder;
+
+	@GetMapping("/clean")
+	public ResponseEntity<Map<String, Boolean>> clearTempFolder(@RequestParam("clearLogs") boolean clearLogs,
+			@RequestParam("delTempFiles") boolean delTempFiles) {
+		System.out.println("Lock file =>" + lokFile);
+		System.out.println("wlServer Tmp Folder =>" + wlServerTmpFolder);
+		System.out.println("wlServer Logs Folder =>" + wlServerLogsFolder);
+		System.out.println("Clear Logs =>" + clearLogs);
+
+		Map<String, Boolean> results = cleanFolders(clearLogs, delTempFiles);
+
+		return new ResponseEntity<>(results, HttpStatus.OK);
+	}
+
+	private Map<String, Boolean> cleanFolders(boolean clearLogs, boolean delTempFiles) {
+		Map<String, Boolean> resultsMap = new HashMap<>();
+
+		String isLokFileExists = executeCommand("ls " + lokFile);
+
+		System.out.println("Lock File Exists =>" + isLokFileExists);
+
+		if (clearLogs || delTempFiles) {
+
+			if (clearLogs) {
+				String executeCommand = executeCommand("rm -rf " + wlServerLogsFolder);
+				System.out.println(executeCommand);
+				resultsMap.put("clearLogs", true);
+			}
+
+			if (delTempFiles) {
+				String executeCommand = executeCommand("rm -rf " + wlServerTmpFolder);
+				System.out.println(executeCommand);
+				resultsMap.put("delTempFiles", true);
+			}
+
+		}
+		return resultsMap;
+	}
+
+	private String executeCommand(String command) {
+		System.out.println("command =>" + command);
+		String resultStr = null;
+		if (null != command && command.length() > 0) {
+			try {
+				String s = null;
+				Runtime run = Runtime.getRuntime();
+				Process procObj = run.exec(command);
+
+				InputStream stdInp = procObj.getInputStream();
+				InputStreamReader isrInp = new InputStreamReader(stdInp);
+				BufferedReader brInp = new BufferedReader(isrInp);
+
+				InputStream stderr = procObj.getErrorStream();
+				InputStreamReader isrErr = new InputStreamReader(stderr);
+				BufferedReader brErr = new BufferedReader(isrErr);
+
+				if (null != brErr.readLine()) {
+					String line = null;
+					System.out.println("<ERROR>");
+					while ((line = brErr.readLine()) != null)
+						System.out.println(line);
+					System.out.println("</ERROR>");
+				}
+
+				if (null != brInp.readLine()) {
+					String line = null;
+					System.out.println("<OUTPUT>");
+					while ((line = brInp.readLine()) != null)
+						System.out.println(line);
+					System.out.println("</OUTPUT>");
+				}
+
+				int exitVal = procObj.waitFor();
+				System.out.println("Process exitValue: " + exitVal);
+
+//				int resultCd = procObj.waitFor();
+//				System.out.println(resultCd);
+//
+//				if (resultCd == 0) {
+//					BufferedReader stdInput = new BufferedReader(new InputStreamReader(procObj.getInputStream()));
+//					// read the output from the command
+//					while ((s = stdInput.readLine()) != null) {
+//						System.out.println(s);
+//					}
+//				} else {
+//					BufferedReader stdErr = new BufferedReader(new InputStreamReader(procObj.getErrorStream()));
+//					// read the output from the command
+//					while ((s = stdErr.readLine()) != null) {
+//						System.out.println(s);
+//					}
+//				}
+
+//				String output = IOUtils.toString(procObj.getInputStream());
+//				String errorOutput = IOUtils.toString(procObj.getErrorStream());
+
+//				BufferedReader stdInput = new BufferedReader(new InputStreamReader(procObj.getInputStream()));
+//				stdInput.lines().forEach(System.out::println);
+//				
+//				BufferedReader stdError = new BufferedReader(new InputStreamReader(procObj.getErrorStream()));
+//				stdError.lines().forEach(System.out::println);
+//				BufferedReader buf = new BufferedReader(new InputStreamReader(procObj.getInputStream()));
+//				String line = "";
+//				while ((line = buf.readLine()) != null) {
+//					System.out.println(line);
+//				}
+
+				// Process procObj = Runtime.getRuntime().exec(command);
+
+				// ProcessBuilder procBuildObj = new ProcessBuilder("/bin/bash", "-c", command);
+				// procBuildObj.command(command);
+//				// map view of this process builder's environment
+//				Map<String, String> envMap = procBuildObj.environment();
+//
+//				// checking map view of environment
+//				for (Map.Entry<String, String> entry : envMap.entrySet()) {
+//					// checking key and value separately
+//					System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+//				}
+
+				// Process procObj = procBuildObj.start();
+
+				// Read the output from the command
+//				String line =null;
+//				while ((line = stdInput.readLine()) != null) {
+//					output.append(line + "\n");
+//				}
+//				
+//				// Read any errors from the attempted command
+//				System.out.println("Here is the standard error of the command (if any):\n");
+//				while ((line = stdError.readLine()) != null) {
+//					output.append(line + "\n");
+//				}
+//
+//				int exitVal = process.waitFor();
+//				if (exitVal == 0) {
+//					resultStr = output.toString();
+//				} else {
+//					resultStr = "ERROR";	
+//				}
+
+			} catch (IOException | InterruptedException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		return resultStr;
+	}
+
+}
